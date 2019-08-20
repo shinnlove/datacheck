@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+
+    <script src="/static/bootstrap/js/jquery.min.js"></script>
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/bootstrap/css/toastr.css" rel="stylesheet">
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap-table.js"></script>
+    <script src="/static/bootstrap/js/bootstrap-table-zh-CN.js"></script>
+    <script src="/static/bootstrap/js/toastr.min.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap-table.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+</head>
+<body>
+    <div style="padding: 20px;">
+    <table id="articles-table" data-toggle="table" class="table table-bordered table-striped"></table>
+    </div>
+</body>
+<script type="text/javascript">
+var $articlesTable = $('#articles-table').bootstrapTable('destroy').bootstrapTable({
+    url: '/blog/all/',
+    method: 'GET',
+    dataType: "json",
+    uniqueId: 'id',
+    striped: false,
+    cache: false,
+    sortName: 'id',
+    sortable: false,
+    sortOrder: 'desc',
+    sidePagination: "server",
+    undefinedText: '--',
+    singleSelect: false,
+    toolbar: '#soft-toolbar',
+    search: false,
+    strictSearch: true,
+    clickToSelect: true,
+    pagination: true,
+    pageNumber: 1,
+    pageSize: 5,
+    pageList: [5, 10, 20, 50, 100],
+    paginationPreText: "上一页",
+    paginationNextText: "下一页",
+    queryParamsType: "",
+    queryParams : function (params) {
+        var temp = {
+            'pageSize' : params.pageSize,
+            'pageNumber' : params.pageNumber,
+            'searchText': params.searchText,
+            'sortName': params.sortName,
+            'sortOrder': params.sortOrder
+        };
+        return temp;
+    },
+    columns: [
+        {
+            checkbox: true
+        },{
+            field: 'title',
+            title:'标题',
+            width: '12%'
+        },{
+            field: 'content',
+            title:'内容',
+            width: '62%'
+        },{
+            field: 'create_time',
+            title:'创建时间',
+            width: '10%'
+        },{
+            title:'删除',
+            formatter: function(value, row, index){
+                return '<button type="button" class="btn btn-primary btn-xs" onclick="deleteData(' + row.id + ')">删除</button>';
+            }
+        }
+    ],
+    onLoadError: function () {
+        toastr.error("数据加载失败！", "错误提示");
+    },
+    onClickRow: function (row, $element) {
+        //    EditViewById(id, 'view');
+    }
+});
+
+function deleteData(id){
+    $.ajax({
+        type: "POST",
+        url: '/article/delete/',
+        data: {id: id},
+        dataType: "json",
+        success: function(data){
+            console.log(data);
+            if(data.ret){
+                toastr.success('删除成功！', '成功提示');
+                $articlesTable.bootstrapTable('refresh');
+            }
+        },
+        error: function(data){
+            console.log(data);
+        }
+    });
+}
+</script>
+</html>
